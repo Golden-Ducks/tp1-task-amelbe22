@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Tue Mar  3 23:09:09 2026
 
-@author: HP
-"""
 
 import re
 from num2words import num2words
@@ -52,6 +48,7 @@ def normalize_text(text):
 
 
 print(normalize_text(text))
+
 
 
 
