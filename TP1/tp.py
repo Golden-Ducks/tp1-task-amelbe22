@@ -1,9 +1,14 @@
-# -*- coding: utf-8 -*-
-
-
 import re
 from num2words import num2words
 
+import pandas as pd
+
+data = pd.read_csv("fake.csv")
+
+data=data.head()
+
+title = data['title']
+texts = data['text']
 
 def clean_text(text):
     text = text.lower()
@@ -19,40 +24,51 @@ def clean_text(text):
     text = re.sub(r'\s+', ' ', text).strip()
     
     return text
+clean_texts = []
+
+for t in texts:
+    clean_texts.append(clean_text(str(t)))
+tokenized_texts = []
+
+for text in clean_texts:
+    tokens = text.split()
+    tokenized_texts.append(tokens)
 
 
-with open("task1.txt", "r") as f:
-    sample_text = f.read()
+vocab = []
 
-cleaned = clean_text(sample_text)
-print(cleaned)
-"""You can smartly distinguish between meaningful % 
-and noise by using a regular expression that keeps % 
-only when it directly follows a digit (like in 88%) 
-and removes it in all other contexts (such as %% or 1%st) 
-using lookahead and lookbehind conditions."""
-
-
-with open("task2.txt", "r") as f:
-    text = f.read() 
-
-
-def normalize_text(text):
-    text = text.lower()
+for doc in tokenized_texts:
+    for word in doc:
+        if word not in vocab:
+            vocab.append(word)
+            
+def vectorize(doc, vocab):
     
-    text = re.sub(r'\d+', lambda x: num2words(int(x.group())), text)
-    text = re.sub(r'[^\w\s]', '', text)
-    text = re.sub(r'\s+', ' ', text).strip()
+    vector = []
     
-    return text
+    for word in vocab:
+        if word in doc:
+            vector.append(1)
+        else:
+            vector.append(0)
+    
+    return vector
 
 
-print(normalize_text(text))
+vectors = []
 
+for doc in tokenized_texts:
+    vectors.append(vectorize(doc, vocab))
+dataset = []
 
+for i in range(len(vectors)):
+    
+    dataset.append((vectors[i], title[i]))
+    
+from sklearn.naive_bayes import BernoulliNB
 
+model = BernoulliNB()
 
-
-
+model.fit(vectors, title)
 
 
